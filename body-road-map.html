@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Body Road Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a field guide page. Map + index side by side, two zoom plates, then two matched signal stages. */
+:root {
+  --bg: #F5F7F9; --surface: #FFFFFF; --ink: #17202B; --muted: #5A6472; --line: #D8DEE6;
+  --body: #E1E6EC; --body-line: #C3CBD6;
+  --control: #6E52CF; --pathway: #2C68CF; --gland: #C27420; --effector: #1F8D66; --transport: #C83A50;
+  --ligand: #E2A000; --receptor: #1F8D66; --fluid: #E4F0F3; --plasma: #F7DCE1; --rbc: #D9586C;
+  --conc: #17839A; --press: #C83A50; --ok: #1F8D66;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --text: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1319; --surface: #161C24; --ink: #E6EBF1; --muted: #9AA5B3; --line: #2A333F;
+  --body: #232C37; --body-line: #3B4654;
+  --control: #A28CF2; --pathway: #6FA1F3; --gland: #E8A453; --effector: #4CC79A; --transport: #F17286;
+  --ligand: #FFC83A; --receptor: #4CC79A; --fluid: #12303A; --plasma: #3B1D27; --rbc: #E2697D;
+  --conc: #45C2DA; --press: #F17286; --ok: #4CC79A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1319; --surface: #161C24; --ink: #E6EBF1; --muted: #9AA5B3; --line: #2A333F;
+  --body: #232C37; --body-line: #3B4654;
+  --control: #A28CF2; --pathway: #6FA1F3; --gland: #E8A453; --effector: #4CC79A; --transport: #F17286;
+  --ligand: #FFC83A; --receptor: #4CC79A; --fluid: #12303A; --plasma: #3B1D27; --rbc: #E2697D;
+  --conc: #45C2DA; --press: #F17286; --ok: #4CC79A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--text); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 56px; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.01em; }
+h2 { font-size: 26px; }
+h3 { font-size: 18px; }
+p { margin: 0; max-width: 65ch; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header { display: grid; gap: 10px; }
+.lede { color: var(--muted); font-size: 17px; }
+section { display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 6px; }
+
+/* Map */
+.map-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.fig { position: relative; padding: 16px; }
+.fig svg { display: block; width: 100%; height: auto; }
+#body-svg { max-height: 640px; }
+.hot { cursor: pointer; outline: none; transition: opacity .15s; }
+.hot .shape { fill-opacity: .24; stroke-width: 1.5; transition: fill-opacity .15s, stroke-width .15s; }
+.hot .line { fill: none; stroke-width: 2.2; }
+.hot .line.branch { stroke-width: 1.8; }
+.hot.active .line.branch { stroke-width: 2.6; }
+.hot .hit { fill: transparent; stroke: transparent; }
+.r-control .shape { fill: var(--control); stroke: var(--control); } .r-control .line { stroke: var(--control); }
+.r-pathway .shape { fill: var(--pathway); stroke: var(--pathway); } .r-pathway .line { stroke: var(--pathway); } .r-pathway .dot { fill: var(--pathway); }
+.r-gland .shape { fill: var(--gland); stroke: var(--gland); }
+.r-effector .shape { fill: var(--effector); stroke: var(--effector); } .r-effector .line { stroke: var(--effector); }
+.r-transport .shape { fill: var(--transport); stroke: var(--transport); } .r-transport .line { stroke: var(--transport); }
+.deep.shape { fill-opacity: .6 !important; }
+svg.has-active .hot:not(.active) { opacity: .3; }
+.hot.active .shape { fill-opacity: .55; stroke-width: 2.4; }
+.hot.active .line { stroke-width: 3.4; }
+.hot:focus-visible .shape, .hot:focus-visible .line { stroke-width: 3.4; }
+.sil { fill: var(--body); }
+.sil-line { fill: none; stroke: var(--body); stroke-linecap: round; stroke-linejoin: round; }
+.faint { fill: var(--body-line); }
+.cord { stroke: var(--body-line); stroke-width: 5; stroke-linecap: round; fill: none; }
+.svg-label { font-family: var(--text); font-size: 12px; fill: var(--muted); }
+.svg-label.strong { fill: var(--ink); font-weight: 600; }
+.leader { stroke: var(--muted); stroke-width: 1; fill: none; }
+
+.tip { position: absolute; z-index: 5; width: min(270px, calc(100% - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: 0 10px 28px rgba(10, 20, 30, .18); display: grid; gap: 6px; pointer-events: none; font-size: 14px; line-height: 1.4; }
+.tip[hidden] { display: none; }
+.stage .svg-label { font-size: 15px; }
+.tip h4 { margin: 0; font-family: var(--display); font-size: 16px; }
+.tip .ws { color: var(--muted); }
+.tip .ws b { color: var(--ink); font-weight: 600; }
+.role { justify-self: start; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid currentColor; }
+.c-control { color: var(--control); } .c-pathway { color: var(--pathway); } .c-gland { color: var(--gland); } .c-effector { color: var(--effector); } .c-transport { color: var(--transport); }
+
+.index { padding: 16px; display: grid; gap: 14px; }
+.index-group { display: grid; gap: 6px; }
+.index-group h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: currentColor; }
+.index-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.index-list button { font: inherit; font-size: 14px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+.index-list button:hover, .index-list button.active { border-color: currentColor; background: var(--bg); }
+.index-list button:focus-visible { outline: 2px solid var(--conc); outline-offset: 2px; }
+.index-note { font-size: 14px; color: var(--muted); }
+
+.zoom-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.zoom-head { padding: 16px 16px 0; display: grid; gap: 2px; }
+.zoom-head p { font-size: 14px; color: var(--muted); }
+
+/* Signal stages */
+.stage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.stage { padding: 18px; display: grid; gap: 12px; align-content: start; }
+.stage-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+.stage-top p { font-size: 15px; color: var(--muted); }
+.stage svg { width: 100%; height: auto; display: block; border-radius: 10px; }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.steps li { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); transition: background .2s, color .2s, border-color .2s; }
+.steps li.on { color: var(--ink); border-color: var(--ink); background: var(--bg); font-weight: 600; }
+.gradients { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.grad { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: grid; gap: 2px; transition: border-color .2s, background .2s; }
+.grad .k { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.grad .v { font-size: 14px; font-weight: 600; color: var(--muted); }
+.grad.conc.on { border-color: var(--conc); background: color-mix(in srgb, var(--conc) 12%, transparent); }
+.grad.conc.on .v { color: var(--conc); }
+.grad.press.on { border-color: var(--press); background: color-mix(in srgb, var(--press) 12%, transparent); }
+.grad.press.on .v { color: var(--press); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.btns { display: flex; gap: 8px; }
+.btn { font: inherit; font-size: 14px; font-weight: 600; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn:focus-visible, .seg button:focus-visible { outline: 2px solid var(--conc); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13px; padding: 6px 11px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.notice { font-size: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.notice b { font-weight: 600; }
+
+/* stage drawing */
+.st-fluid { fill: var(--fluid); }
+.st-cell-a { fill: color-mix(in srgb, var(--gland) 22%, var(--surface)); stroke: var(--gland); stroke-width: 1.5; }
+.st-neuron { fill: color-mix(in srgb, var(--pathway) 20%, var(--surface)); stroke: var(--pathway); stroke-width: 1.5; }
+.st-cell-b { fill: color-mix(in srgb, var(--effector) 12%, var(--surface)); stroke: var(--effector); stroke-width: 1.5; transition: fill .3s; }
+.st-cell-c { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.responding .st-cell-b { fill: color-mix(in srgb, var(--ok) 45%, var(--surface)); }
+.st-nucleus { fill: none; stroke: var(--muted); stroke-width: 1; opacity: .6; }
+.st-ves { fill: var(--ligand); opacity: .8; }
+.st-receptor { fill: none; stroke: var(--receptor); stroke-width: 2.4; stroke-linecap: round; }
+.st-receptor.bound { stroke: var(--ok); stroke-width: 3.2; }
+.ligand { fill: var(--ligand); stroke: color-mix(in srgb, var(--ligand) 60%, #000); stroke-width: .6; }
+.st-plasma { fill: var(--plasma); }
+.st-wall { stroke: var(--transport); stroke-width: 2.5; stroke-dasharray: 18 5; }
+.st-rbc { fill: var(--rbc); opacity: .75; }
+.st-break { stroke: var(--muted); stroke-width: 2; }
+.st-stri { stroke: var(--effector); stroke-width: 1; opacity: .35; }
+.musc { transform-box: fill-box; transform-origin: left center; transition: transform .45s ease; }
+.responding .musc { transform: scaleX(.9); }
+.gran { transition: transform 1.2s ease, opacity 1.2s ease; }
+.responding .gran { transform: translateY(-46px); opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .musc, .gran, .steps li, .grad, .st-cell-b { transition: none; } }
+
+@media (max-width: 860px) {
+  .map-grid, .stage-grid, .zoom-grid { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Physiology · Cell-to-cell communication</span>
+    <h1>Body Road Map</h1>
+    <p class="lede">Every gland, tissue and organ from the worksheet, placed where it sits in the body. Hover over or tap a structure to see what it does and where it shows up in the worksheet.</p>
+  </header>
+
+  <section aria-labelledby="map-h">
+    <div class="sec-head">
+      <span class="eyebrow">Where are we in the body?</span>
+      <h2 id="map-h">The map</h2>
+    </div>
+    <div class="map-grid">
+      <div class="panel fig" id="fig-body">
+        <svg id="body-svg" viewBox="0 0 300 620" role="group" aria-label="Front view of the body with worksheet structures">
+          <defs><marker id="sym-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--pathway)"/></marker>
+          <marker id="ves-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--transport)"/></marker></defs>
+          <g aria-hidden="true">
+            <ellipse class="sil" cx="150" cy="62" rx="34" ry="42"/>
+            <rect class="sil" x="134" y="96" width="32" height="32" rx="8"/>
+            <path class="sil" d="M96 124 Q150 112 204 124 Q218 130 216 150 L208 300 Q206 330 214 362 L86 362 Q94 330 92 300 L84 150 Q82 130 96 124 Z"/>
+            <rect class="sil" x="86" y="330" width="128" height="58" rx="24"/>
+            <path class="sil-line" stroke-width="26" d="M98 140 L70 248 L60 338"/>
+            <path class="sil-line" stroke-width="26" d="M202 140 L230 248 L240 338"/>
+            <path class="sil-line" stroke-width="40" d="M124 372 L118 480 L116 596"/>
+            <path class="sil-line" stroke-width="40" d="M176 372 L182 480 L184 596"/>
+            <ellipse class="faint" cx="150" cy="54" rx="27" ry="25" opacity=".55"/>
+            <path class="cord" d="M150 96 L150 340"/>
+          </g>
+
+          <g class="hot r-transport" data-id="vessels" tabindex="0" role="button" aria-label="Blood vessels">
+            <path class="line" d="M150 198 L150 348 L122 382 L118 520 M150 348 L178 382 L182 520 M150 200 Q120 136 100 150 L74 246 L64 320 M150 200 Q180 136 200 150 L226 246 L236 320"/>
+            <path class="hit" stroke-width="12" d="M150 198 L150 348 L122 382 L118 520 M150 348 L178 382 L182 520"/>
+          </g>
+          <g class="hot r-effector" data-id="lungs" tabindex="0" role="button" aria-label="Lungs and bronchioles">
+            <path class="shape" d="M140 148 Q112 144 106 178 Q102 214 120 222 Q138 222 141 200 Z"/>
+            <path class="shape" d="M160 148 Q188 144 194 178 Q198 214 180 222 Q162 222 159 200 Z"/>
+            <path class="line" stroke-width="1.5" d="M150 128 L150 150 M150 150 L128 170 M150 150 L172 170 M134 164 L126 188 M166 164 L174 188"/>
+          </g>
+          <g class="hot r-effector" data-id="kidneys" tabindex="0" role="button" aria-label="Kidneys">
+            <path class="shape" d="M106 288 Q96 298 101 314 Q109 326 118 317 Q114 307 120 299 Q119 285 106 288 Z"/>
+            <path class="shape" d="M194 288 Q204 298 199 314 Q191 326 182 317 Q186 307 180 299 Q181 285 194 288 Z"/>
+          </g>
+          <g class="hot r-gland" data-id="adrenals" tabindex="0" role="button" aria-label="Adrenal glands">
+            <path class="shape" d="M99 288 L109 272 L121 288 Z"/>
+            <path class="shape" d="M179 288 L191 272 L201 288 Z"/>
+            <circle class="hit" cx="110" cy="281" r="11"/><circle class="hit" cx="190" cy="281" r="11"/>
+          </g>
+          <g class="hot r-effector" data-id="liver" tabindex="0" role="button" aria-label="Liver">
+            <path class="shape" d="M96 228 Q120 213 157 222 Q161 236 146 248 Q118 258 98 252 Q90 240 96 228 Z"/>
+          </g>
+          <g class="hot r-effector" data-id="gut" tabindex="0" role="button" aria-label="Digestive organs">
+            <path class="shape" d="M166 226 Q190 220 195 240 Q195 260 174 262 Q160 262 160 250 Q170 246 166 236 Z"/>
+            <ellipse class="shape" cx="150" cy="314" rx="28" ry="22"/>
+            <path class="line" stroke-width="1.4" d="M132 306 Q150 297 168 306 Q150 315 133 321 Q150 331 167 323"/>
+          </g>
+          <g class="hot r-gland" data-id="pancreas" tabindex="0" role="button" aria-label="Pancreas">
+            <path class="shape" d="M134 266 Q160 259 187 267 Q190 273 183 277 Q160 272 138 275 Q131 271 134 266 Z"/>
+            <rect class="hit" x="130" y="258" width="62" height="22"/>
+          </g>
+          <g class="hot r-effector" data-id="heart" tabindex="0" role="button" aria-label="Heart">
+            <path class="shape" d="M160 172 C153 161 138 165 140 180 C142 194 156 203 162 211 C168 203 182 193 182 180 C182 166 167 161 160 172 Z"/>
+          </g>
+          <g class="hot r-effector" data-id="muscle" tabindex="0" role="button" aria-label="Skeletal muscle">
+            <ellipse class="shape" cx="121" cy="432" rx="17" ry="46"/>
+          </g>
+          <g class="hot r-pathway" data-id="sympathetic" tabindex="0" role="button" aria-label="Sympathetic neurons">
+            <path class="line" stroke-dasharray="4 3" d="M162 132 L162 300"/>
+            <path class="line branch" marker-end="url(#sym-arrow)" d="M162 162 Q190 158 178 174"/>
+            <path class="line branch" marker-end="url(#sym-arrow)" d="M162 256 Q136 255 115 272"/>
+            <path class="line branch" marker-end="url(#sym-arrow)" d="M162 256 Q184 258 188 272"/>
+            <circle class="dot" cx="162" cy="150" r="2.6"/><circle class="dot" cx="162" cy="180" r="2.6"/><circle class="dot" cx="162" cy="210" r="2.6"/><circle class="dot" cx="162" cy="240" r="2.6"/><circle class="dot" cx="162" cy="270" r="2.6"/><circle class="dot" cx="162" cy="300" r="2.6"/>
+            <path class="hit" stroke-width="12" d="M162 132 L162 300"/>
+          </g>
+          <g class="hot r-pathway" data-id="sensory" tabindex="0" role="button" aria-label="Sensory neurons">
+            <path class="line" d="M58 340 L69 248 L97 142 L142 130 L146 106 L148 80"/>
+            <circle class="dot" cx="58" cy="340" r="3.5"/>
+            <path class="hit" stroke-width="14" d="M58 340 L69 248 L97 142 L142 130"/>
+          </g>
+          <g class="hot r-control" data-id="hypothalamus" tabindex="0" role="button" aria-label="Hypothalamus">
+            <ellipse class="shape" cx="150" cy="70" rx="9" ry="5.5"/>
+            <ellipse class="hit" cx="150" cy="69" rx="14" ry="7"/>
+          </g>
+          <g class="hot r-gland" data-id="pituitary" tabindex="0" role="button" aria-label="Pituitary gland">
+            <circle class="shape" cx="151" cy="85" r="4.5"/>
+            <circle class="hit" cx="151" cy="85" r="7.5"/>
+          </g>
+
+          <g aria-hidden="true">
+            <path class="leader" d="M159 70 L214 40"/><text class="svg-label" x="216" y="38">Hypothalamus</text>
+            <path class="leader" d="M156 86 L214 60"/><text class="svg-label" x="216" y="62">Pituitary</text>
+            <path class="leader" d="M96 238 L40 214"/><text class="svg-label" x="8" y="210">Liver</text>
+            <path class="leader" d="M107 280 L40 268"/><text class="svg-label" x="8" y="264">Adrenal</text>
+            <path class="leader" d="M103 312 L40 300"/><text class="svg-label" x="8" y="298">Kidney</text>
+          </g>
+        </svg>
+        <div class="tip" hidden></div>
+      </div>
+
+      <div class="panel index" id="index">
+        <div class="index-group c-control"><h3><span class="swatch"></span>Control center</h3><div class="index-list"><button data-id="hypothalamus">Hypothalamus</button></div></div>
+        <div class="index-group c-pathway"><h3><span class="swatch"></span>Neural pathways</h3><div class="index-list"><button data-id="sensory">Sensory neurons</button><button data-id="sympathetic">Sympathetic neurons</button></div></div>
+        <div class="index-group c-gland"><h3><span class="swatch"></span>Glands</h3><div class="index-list"><button data-id="pituitary">Pituitary</button><button data-id="adrenals">Adrenal glands</button><button data-id="pancreas">Pancreas</button></div></div>
+        <div class="index-group c-effector"><h3><span class="swatch"></span>Target tissues and organs</h3><div class="index-list"><button data-id="heart">Heart</button><button data-id="lungs">Lungs (bronchioles)</button><button data-id="liver">Liver</button><button data-id="gut">Digestive organs</button><button data-id="kidneys">Kidneys</button><button data-id="muscle">Skeletal muscle</button></div></div>
+        <div class="index-group c-transport"><h3><span class="swatch"></span>Transport</h3><div class="index-list"><button data-id="vessels">Blood vessels</button></div></div>
+      </div>
+    </div>
+
+    <div class="zoom-grid">
+      <div class="panel">
+        <div class="zoom-head"><span class="eyebrow">Zoom 1</span><h3>Base of the brain</h3></div>
+        <div class="fig" id="fig-brain">
+          <svg viewBox="-24 0 380 252" role="group" aria-label="Hypothalamus and pituitary, enlarged">
+            <defs><marker id="ves-arrow-z" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--transport)"/></marker></defs>
+            <path class="sil" d="M14 82 Q170 -16 326 82 L326 98 Q170 74 14 98 Z"/>
+            <text class="svg-label" x="170" y="50" text-anchor="middle">Brain</text>
+            <g class="hot r-transport" data-id="portal" tabindex="0" role="button" aria-label="Blood vessels from the hypothalamus to the anterior pituitary">
+              <path class="line" d="M140 104 Q132 126 136 150 M150 106 Q146 128 148 150"/>
+              <path class="hit" stroke-width="14" d="M144 106 L142 150"/>
+            </g>
+            <g class="hot r-pathway" data-id="hneurons" tabindex="0" role="button" aria-label="Neurons from the hypothalamus to the posterior pituitary">
+              <path class="line" d="M164 102 Q176 124 182 152 M172 100 Q186 122 192 154"/>
+              <path class="hit" stroke-width="14" d="M168 102 L187 152"/>
+            </g>
+            <g class="hot r-control" data-id="hypothalamus" tabindex="0" role="button" aria-label="Hypothalamus">
+              <ellipse class="shape" cx="160" cy="94" rx="48" ry="17"/>
+            </g>
+            <text class="svg-label strong" x="160" y="98" text-anchor="middle" pointer-events="none">Hypothalamus</text>
+            <g class="hot r-gland" data-id="antpit" tabindex="0" role="button" aria-label="Anterior pituitary">
+              <ellipse class="shape" cx="138" cy="172" rx="27" ry="21"/>
+            </g>
+            <g class="hot r-gland" data-id="postpit" tabindex="0" role="button" aria-label="Posterior pituitary">
+              <ellipse class="shape" cx="188" cy="172" rx="19" ry="19" stroke-dasharray="4 3"/>
+            </g>
+            <path class="leader" d="M110 172 L96 172"/><text class="svg-label" x="92" y="176" text-anchor="end">Anterior pituitary</text>
+            <path class="leader" d="M208 172 L222 172"/><text class="svg-label" x="226" y="176">Posterior pituitary</text>
+            <path class="leader" d="M134 128 L96 128"/><text class="svg-label" x="92" y="132" text-anchor="end">Blood vessels</text>
+            <path class="leader" d="M186 128 L222 128"/><text class="svg-label" x="226" y="132">Neurons</text>
+            <g class="hot r-transport" data-id="pitvessels" tabindex="0" role="button" aria-label="Blood vessels leaving the pituitary">
+              <path class="line" marker-end="url(#ves-arrow-z)" d="M130 192 Q124 212 118 236 M146 192 Q150 212 154 236 M182 190 Q180 212 178 236 M196 186 Q202 210 206 236"/>
+              <path class="hit" stroke-width="16" d="M124 194 L120 236 M150 194 L154 236 M181 192 L178 236 M199 190 L206 236"/>
+            </g>
+            <path class="leader" d="M210 226 L222 226"/><text class="svg-label" x="226" y="224">Blood vessels</text><text class="svg-label" x="226" y="238">(to the rest of the body)</text>
+          </svg>
+          <div class="tip" hidden></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="zoom-head"><span class="eyebrow">Zoom 2</span><h3>One adrenal gland</h3><p>Two glands in one: an outer layer that answers to hormones and an inner core that answers to neurons.</p></div>
+        <div class="fig" id="fig-adrenal">
+          <svg viewBox="0 0 340 210" role="group" aria-label="Adrenal gland on top of a kidney, enlarged">
+            <path class="sil" d="M86 126 Q50 146 66 186 Q92 206 132 196 Q172 206 212 192 Q250 176 230 138 Q214 118 172 128 Q132 116 86 126 Z"/>
+            <text class="svg-label" x="150" y="170" text-anchor="middle">Kidney</text>
+            <g class="hot r-gland" data-id="cortex" tabindex="0" role="button" aria-label="Adrenal cortex">
+              <path class="shape" d="M90 128 Q144 26 208 122 Q150 112 90 128 Z"/>
+            </g>
+            <g class="hot r-gland" data-id="medulla" tabindex="0" role="button" aria-label="Adrenal medulla">
+              <path class="shape deep" d="M116 120 Q148 62 184 116 Q150 110 116 120 Z"/>
+            </g>
+            <path class="leader" d="M186 74 L232 60"/><text class="svg-label" x="236" y="58">Adrenal cortex</text><text class="svg-label" x="236" y="72">(outer layer)</text>
+            <path class="leader" d="M166 104 L232 104"/><text class="svg-label" x="236" y="102">Adrenal medulla</text><text class="svg-label" x="236" y="116">(inner core)</text>
+          </svg>
+          <div class="tip" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sig-h">
+    <div class="sec-head">
+      <span class="eyebrow">How does a signal get there?</span>
+      <h2 id="sig-h">Two ways a signal travels</h2>
+      <p class="lede">Both stages use the same pieces: a releasing cell, signal molecules, receptors on a target cell. Watch which gradient lights up at each step.</p>
+    </div>
+    <div class="stage-grid">
+      <article class="panel stage" id="para">
+        <div class="stage-top"><h3>Paracrine: a neuron to a nearby cell</h3><p>Distance: very short</p></div>
+        <svg viewBox="0 0 640 320" role="img" aria-label="Animation: a neuron ending releases neurotransmitter that diffuses to receptors on a nearby target cell"></svg>
+        <ol class="steps" aria-label="Steps"><li data-s="release">Release</li><li data-s="diffuse">Diffuse across the gap</li><li data-s="bind">Bind receptors</li><li data-s="respond">Target responds</li></ol>
+        <div class="gradients"><div class="grad conc"><span class="k">Concentration gradient</span><span class="v">In use</span></div><div class="grad press"><span class="k">Pressure gradient</span><span class="v">Not used</span></div></div>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Target cell"><button data-t="neuron" aria-pressed="true">Neuron</button><button data-t="muscle" aria-pressed="false">Muscle</button><button data-t="gland" aria-pressed="false">Gland</button></div>
+          <div class="btns"><button class="btn play">Pause</button><button class="btn replay">Replay</button></div>
+        </div>
+        <p class="notice"><b>What to notice:</b> the signal never enters the blood. Diffusion down its concentration gradient is the only thing moving it.</p>
+      </article>
+      <article class="panel stage" id="endo">
+        <div class="stage-top"><h3>Endocrine: a gland cell to a distant cell</h3><p>Distance: anywhere blood goes</p></div>
+        <svg viewBox="0 0 640 320" role="img" aria-label="Animation: a gland cell releases hormone that enters a capillary, is carried by blood, leaves the capillary, and binds receptors on a distant target cell"></svg>
+        <ol class="steps" aria-label="Steps"><li data-s="release">Release</li><li data-s="into">Into the capillary</li><li data-s="flow">Carried by blood</li><li data-s="out">Out of the capillary</li><li data-s="bind">Bind receptors</li><li data-s="respond">Target responds</li></ol>
+        <div class="gradients"><div class="grad conc"><span class="k">Concentration gradient</span><span class="v">In use</span></div><div class="grad press"><span class="k">Pressure gradient</span><span class="v">In use</span></div></div>
+        <div class="controls">
+          <span class="index-note">The lower cell has no receptor, so the hormone reaches it with no effect.</span>
+          <div class="btns"><button class="btn play">Pause</button><button class="btn replay">Replay</button></div>
+        </div>
+        <p class="notice"><b>What to notice:</b> diffusion moves the hormone into and out of the blood, but blood pressure carries it the long distance in between.</p>
+      </article>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const INFO = {
+    hypothalamus: { name: 'Hypothalamus', role: 'control', what: 'A small region at the base of the brain. It compares conditions in the body to set points and sends out commands.', ws: 'Control center in Parts 4 and 6. Releases CRH, makes ADH, and activates sympathetic neurons.' },
+    pituitary: { name: 'Pituitary gland', role: 'gland', what: 'A pea-sized gland hanging just below the hypothalamus. It has a front (anterior) and back (posterior) part; see Zoom 1.', ws: 'Releases ACTH (Part 4) and ADH (Part 6).' },
+    antpit: { name: 'Anterior pituitary', role: 'gland', what: 'Front part of the pituitary. It is a true gland, linked to the hypothalamus by tiny blood vessels.', ws: 'Receives CRH and releases ACTH into the blood (Part 4).' },
+    postpit: { name: 'Posterior pituitary', role: 'gland', what: 'Back part of the pituitary. It holds the endings of neurons whose cell bodies sit in the hypothalamus.', ws: 'Where ADH enters the blood (Part 6).' },
+    portal: { name: 'Blood vessels to the anterior pituitary', role: 'transport', what: 'Tiny vessels that run straight from the hypothalamus to the anterior pituitary, a very short trip through blood.', ws: 'The route CRH takes (Part 3, row e).' },
+    pitvessels: { name: 'Blood vessels leaving the pituitary', role: 'transport', what: 'Vessels that carry pituitary hormones away into the general circulation.', ws: 'ACTH leaves the anterior pituitary this way (Part 4). ADH leaves the posterior pituitary this way (Part 6).' },
+    hneurons: { name: 'Hypothalamic neurons', role: 'pathway', what: 'Neurons that start in the hypothalamus and end in the posterior pituitary. They release their signal into the blood, not onto another cell.', ws: 'They make and release ADH (Part 3, row f; Part 6).' },
+    sensory: { name: 'Sensory neurons', role: 'pathway', what: 'Neurons that carry information from the body toward the brain.', ws: 'The afferent pathway in Part 4.' },
+    sympathetic: { name: 'Sympathetic neurons', role: 'pathway', what: 'Neurons running beside the spinal cord that carry fight-or-flight commands out to organs. The arrows show the branches named in the worksheet: to the heart and to each adrenal gland.', ws: 'Release norepinephrine next to cardiac cells (Parts 2B and 3) and acetylcholine next to adrenal medulla cells (Parts 3 and 4B).' },
+    adrenals: { name: 'Adrenal glands', role: 'gland', what: 'One gland sits on top of each kidney. Each has an outer cortex and an inner medulla; see Zoom 2.', ws: 'Release epinephrine and cortisol (Parts 2 to 5).' },
+    cortex: { name: 'Adrenal cortex', role: 'gland', what: 'The outer layer of the adrenal gland. It builds steroid hormones from cholesterol when they are needed.', ws: 'Makes cortisol when ACTH arrives (Parts 4 and 5).' },
+    medulla: { name: 'Adrenal medulla', role: 'gland', what: 'The inner core of the adrenal gland. Sympathetic neurons connect to it directly.', ws: 'Releases epinephrine into the blood when sympathetic neurons signal (Parts 2, 3 and 4).' },
+    pancreas: { name: 'Pancreas', role: 'gland', what: 'A gland tucked behind the stomach. Its beta cells release insulin.', ws: 'α₂ receptors: epinephrine lowers insulin release (Part 5).' },
+    heart: { name: 'Heart', role: 'effector', what: 'The pump that creates the pressure gradient driving blood flow.', ws: 'Sympathetic neurons release norepinephrine here (Part 2B). β₁ receptors: the heart beats faster (Parts 3 and 5).' },
+    lungs: { name: 'Lungs (bronchioles)', role: 'effector', what: 'The small airways in the lungs, wrapped in smooth muscle.', ws: 'β₂ receptors: smooth muscle relaxes and airways widen (Parts 3 and 5).' },
+    liver: { name: 'Liver', role: 'effector', what: 'Stores glucose as glycogen and can build new glucose.', ws: 'Target of epinephrine (fast) and cortisol (slow); both raise blood glucose (Parts 4 and 5).' },
+    gut: { name: 'Digestive organs', role: 'effector', what: 'The stomach and intestines, supplied with blood by arterioles.', ws: 'α₁ receptors: arterioles constrict and blood flow to the gut drops (Part 2C).' },
+    kidneys: { name: 'Kidneys', role: 'effector', what: 'Filter the blood and adjust how much water leaves in urine. They sit toward the back.', ws: 'ADH inserts water channels into collecting duct cells (Part 6).' },
+    muscle: { name: 'Skeletal muscle', role: 'effector', what: 'Muscle that moves the skeleton, like the thigh shown here.', ws: 'β₂ receptors: its arterioles dilate and its fibers break down glycogen (Parts 2 and 5).' },
+    vessels: { name: 'Blood vessels', role: 'transport', what: 'Arteries carry blood under pressure, arterioles set resistance, and capillaries let molecules in and out.', ws: 'The route every hormone travels (Part 2).' }
+  };
+  const ROLE = { control: 'Control center', pathway: 'Neural pathway', gland: 'Gland', effector: 'Target tissue', transport: 'Transport' };
+
+  function setupFig(fig) {
+    const svg = fig.querySelector('svg');
+    const tip = fig.querySelector('.tip');
+    function show(id) {
+      const d = INFO[id]; if (!d) return;
+      svg.classList.add('has-active');
+      svg.querySelectorAll('.hot').forEach(h => h.classList.toggle('active', h.dataset.id === id));
+      tip.innerHTML = '';
+      const h = document.createElement('h4'); h.textContent = d.name;
+      const r = document.createElement('span'); r.className = 'role c-' + d.role; r.textContent = ROLE[d.role];
+      const w = document.createElement('p'); w.textContent = d.what;
+      const s = document.createElement('p'); s.className = 'ws'; s.innerHTML = '<b>In the worksheet:</b> '; s.append(d.ws);
+      tip.append(h, r, w, s);
+      tip.hidden = false;
+      const el = svg.querySelector('.hot[data-id="' + id + '"]');
+      const fr = fig.getBoundingClientRect(), br = el.getBoundingClientRect();
+      const tw = tip.offsetWidth, th = tip.offsetHeight, W = fr.width, H = fr.height;
+      let below = false;
+      let x = br.right - fr.left + 12;
+      if (x + tw > W - 8) x = br.left - fr.left - tw - 12;
+      if (x < 8) { below = true; x = Math.max(8, Math.min(W - tw - 8, br.left - fr.left + br.width / 2 - tw / 2)); }
+      let y = below ? br.bottom - fr.top + 10 : br.top - fr.top + br.height / 2 - th / 2;
+      if (below && y + th > H - 8) y = br.top - fr.top - th - 10;
+      y = Math.max(8, Math.min(H - th - 8, y));
+      tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    }
+    function hide() {
+      svg.classList.remove('has-active');
+      svg.querySelectorAll('.hot.active').forEach(h => h.classList.remove('active'));
+      tip.hidden = true;
+    }
+    svg.querySelectorAll('.hot').forEach(h => {
+      h.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') show(h.dataset.id); });
+      h.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hide(); });
+      h.addEventListener('focus', () => show(h.dataset.id));
+      h.addEventListener('blur', hide);
+      h.addEventListener('click', e => { e.stopPropagation(); show(h.dataset.id); });
+      h.addEventListener('keydown', e => { if (e.key === 'Escape') { hide(); h.blur(); } });
+    });
+    fig.addEventListener('click', e => { if (!e.target.closest('.hot')) hide(); });
+    return { show, hide };
+  }
+  const bodyFig = setupFig(document.getElementById('fig-body'));
+  setupFig(document.getElementById('fig-brain'));
+  setupFig(document.getElementById('fig-adrenal'));
+  document.querySelectorAll('#index button').forEach(b => {
+    const on = () => { document.querySelectorAll('#index button').forEach(x => x.classList.toggle('active', x === b)); bodyFig.show(b.dataset.id); };
+    const off = () => { b.classList.remove('active'); bodyFig.hide(); };
+    b.addEventListener('mouseenter', on); b.addEventListener('mouseleave', off);
+    b.addEventListener('focus', on); b.addEventListener('blur', off);
+    b.addEventListener('click', on);
+  });
+
+  /* ---------- signal stages ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function txt(x, y, s, parent, anchor) { const t = el('text', { x, y, class: 'svg-label', 'text-anchor': anchor || 'start' }, parent); t.textContent = s; return t; }
+  const rnd = () => Math.random() - 0.5;
+
+  function makeStage(root, build, step) {
+    const svg = root.querySelector('svg');
+    const chips = root.querySelectorAll('.steps li');
+    const conc = root.querySelector('.grad.conc'), press = root.querySelector('.grad.press');
+    const playBtn = root.querySelector('.play'), replayBtn = root.querySelector('.replay');
+    let S = null, running = !reduce, acc = 0, last = 0;
+    function reset() { while (svg.firstChild) svg.removeChild(svg.firstChild); S = build(svg); S.t = 0; render(); }
+    function render() {
+      const st = S.status();
+      chips.forEach(c => c.classList.toggle('on', !!st[c.dataset.s]));
+      conc.classList.toggle('on', !!st.conc); press.classList.toggle('on', !!st.press);
+      S.draw();
+    }
+    function frame(ts) {
+      if (!last) last = ts; acc += Math.min(80, ts - last); last = ts;
+      if (running) { let n = 0; while (acc >= 16.7 && n < 4) { step(S); S.t++; acc -= 16.7; n++; } render(); } else acc = 0;
+      requestAnimationFrame(frame);
+    }
+    playBtn.addEventListener('click', () => { running = !running; playBtn.textContent = running ? 'Pause' : 'Play'; });
+    replayBtn.addEventListener('click', () => { reset(); if (reduce) prime(); });
+    function prime() { for (let i = 0; i < S.primeAt; i++) { step(S); S.t++; } render(); }
+    reset();
+    if (reduce) { prime(); playBtn.textContent = 'Play'; }
+    requestAnimationFrame(frame);
+    return { reset, setRunning: v => { running = v; } };
+  }
+
+  /* Paracrine */
+  let paraTarget = 'neuron';
+  function buildPara(svg) {
+    el('rect', { x: 0, y: 0, width: 640, height: 320, class: 'st-fluid' }, svg);
+    const axon = el('path', { d: 'M0 152 L170 152 L170 168 L0 168 Z', class: 'st-neuron' }, svg);
+    el('circle', { cx: 196, cy: 160, r: 32, class: 'st-neuron' }, svg);
+    for (let i = 0; i < 7; i++) el('circle', { cx: 184 + (i % 3) * 9, cy: 146 + Math.floor(i / 3) * 11, r: 3.2, class: 'st-ves' }, svg);
+    txt(196, 214, 'Neuron ending', svg, 'middle');
+    txt(242, 70, 'Interstitial fluid', svg, 'middle');
+    const tg = el('g', {}, svg);
+    if (paraTarget === 'neuron') {
+      el('path', { d: 'M262 128 L330 140 Q350 100 410 100 Q480 100 490 160 Q480 220 410 220 Q350 220 330 180 L262 192 Z', class: 'st-cell-b' }, tg);
+      el('circle', { cx: 415, cy: 160, r: 22, class: 'st-nucleus' }, tg);
+      txt(415, 252, 'Target: neuron', svg, 'middle');
+    } else if (paraTarget === 'muscle') {
+      const m = el('g', { class: 'musc' }, tg);
+      el('rect', { x: 262, y: 110, width: 350, height: 100, rx: 22, class: 'st-cell-b' }, m);
+      for (let x = 290; x < 600; x += 14) el('line', { x1: x, y1: 116, x2: x, y2: 204, class: 'st-stri' }, m);
+      txt(437, 242, 'Target: muscle cell', svg, 'middle');
+    } else {
+      el('rect', { x: 262, y: 96, width: 240, height: 128, rx: 20, class: 'st-cell-b' }, tg);
+      el('circle', { cx: 400, cy: 172, r: 20, class: 'st-nucleus' }, tg);
+      const gr = el('g', { class: 'gran' }, tg);
+      [[330, 120], [360, 112], [392, 118], [424, 110], [456, 120], [346, 140], [440, 140]].forEach(p => el('circle', { cx: p[0], cy: p[1], r: 4, class: 'st-ves' }, gr));
+      txt(382, 252, 'Target: gland cell', svg, 'middle');
+    }
+    const rec = [126, 148, 172, 194].map(y => ({ x: 262, y, b: null, e: el('path', { d: `M270 ${y - 7} L262 ${y - 7} L262 ${y + 7} L270 ${y + 7}`, class: 'st-receptor' }, svg) }));
+    txt(300, 292, 'Receptors sit on the target cell membrane', svg, 'middle');
+    const P = []; for (let i = 0; i < 24; i++) P.push({ s: 'idle', x: 0, y: 0, o: 1, e: el('circle', { r: 4.2, class: 'ligand', opacity: 0 }, svg) });
+    const S = {
+      P, rec, tg, respondAt: -1, primeAt: 70,
+      status() {
+        const f = P.some(p => p.s === 'free'), b = rec.some(r => r.b);
+        const responding = this.respondAt >= 0 && this.t - this.respondAt < 150;
+        return { release: this.t < 50, diffuse: f, bind: b && !responding, respond: responding, conc: f };
+      },
+      draw() {
+        P.forEach(p => { p.e.setAttribute('cx', p.x.toFixed(1)); p.e.setAttribute('cy', p.y.toFixed(1)); p.e.setAttribute('opacity', p.s === 'idle' ? 0 : p.o.toFixed(2)); });
+        rec.forEach(r => r.e.classList.toggle('bound', !!r.b));
+        tg.classList.toggle('responding', this.respondAt >= 0 && this.t - this.respondAt < 150);
+      }
+    };
+    return S;
+  }
+  function stepPara(S) {
+    const t = S.t;
+    if (t < 48 && t % 2 === 0) { const p = S.P[t / 2]; p.s = 'free'; p.x = 228; p.y = 160 + rnd() * 30; p.o = 1; }
+    S.P.forEach(p => {
+      if (p.s === 'free') {
+        p.x += rnd() * 2.6 + 0.32; p.y += rnd() * 2.6;
+        p.y = Math.max(104, Math.min(216, p.y)); if (p.x < 228) p.x = 228;
+        if (p.x >= 256) {
+          const r = S.rec.find(r => !r.b && Math.abs(r.y - p.y) < 9);
+          if (r && S.respondAt < 0) { r.b = p; p.s = 'bound'; p.x = 258; p.y = r.y; } else p.x = 255;
+        }
+      } else if (p.s === 'fade') { p.o -= 0.02; if (p.o <= 0) p.s = 'idle'; }
+    });
+    if (S.respondAt < 0 && S.rec.filter(r => r.b).length >= 3) S.respondAt = t;
+    if (S.respondAt >= 0 && t - S.respondAt === 150) { S.P.forEach(p => { if (p.s !== 'idle') p.s = 'fade'; }); S.rec.forEach(r => r.b = null); }
+    if ((S.respondAt >= 0 && t - S.respondAt > 230) || t > 1400) { S.t = -1; S.respondAt = -1; S.P.forEach(p => { p.s = 'idle'; }); }
+  }
+  const para = makeStage(document.getElementById('para'), buildPara, stepPara);
+  document.querySelectorAll('#para .seg button').forEach(b => b.addEventListener('click', () => {
+    paraTarget = b.dataset.t;
+    document.querySelectorAll('#para .seg button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    para.reset();
+  }));
+
+  /* Endocrine */
+  function buildEndo(svg) {
+    el('rect', { x: 0, y: 0, width: 640, height: 320, class: 'st-fluid' }, svg);
+    el('rect', { x: 0, y: 160, width: 640, height: 50, class: 'st-plasma' }, svg);
+    const rbcs = []; for (let i = 0; i < 9; i++) rbcs.push({ x: i * 74 + rnd() * 20, y: 172 + (i % 3) * 13, e: el('ellipse', { rx: 10, ry: 5, class: 'st-rbc' }, svg) });
+    el('line', { x1: 0, y1: 160, x2: 640, y2: 160, class: 'st-wall' }, svg);
+    el('line', { x1: 0, y1: 210, x2: 640, y2: 210, class: 'st-wall' }, svg);
+    el('rect', { x: 296, y: 150, width: 34, height: 70, fill: 'var(--fluid)' }, svg);
+    el('line', { x1: 298, y1: 222, x2: 310, y2: 148, class: 'st-break' }, svg);
+    el('line', { x1: 316, y1: 222, x2: 328, y2: 148, class: 'st-break' }, svg);
+    txt(313, 240, 'much farther away in the body', svg, 'middle');
+    txt(14, 228, 'Capillary (blood flows →)', svg);
+    el('rect', { x: 30, y: 30, width: 150, height: 92, rx: 18, class: 'st-cell-a' }, svg);
+    el('circle', { cx: 80, cy: 72, r: 16, class: 'st-nucleus' }, svg);
+    [[120, 56], [140, 72], [122, 90], [150, 98], [104, 104]].forEach(p => el('circle', { cx: p[0], cy: p[1], r: 3.2, class: 'st-ves' }, svg));
+    txt(105, 20, 'Gland cell', svg, 'middle');
+    txt(250, 120, 'Interstitial fluid', svg, 'middle');
+    const tg = el('g', {}, svg);
+    el('rect', { x: 466, y: 24, width: 148, height: 96, rx: 18, class: 'st-cell-b' }, tg);
+    el('circle', { cx: 540, cy: 66, r: 16, class: 'st-nucleus' }, tg);
+    txt(540, 16, 'Target cell: has receptors', svg, 'middle');
+    el('rect', { x: 466, y: 250, width: 148, height: 60, rx: 18, class: 'st-cell-c' }, svg);
+    txt(540, 284, 'No receptor', svg, 'middle');
+    const rec = [494, 524, 556, 586].map(x => ({ x, y: 120, b: null, e: el('path', { d: `M${x - 7} 128 L${x - 7} 120 L${x + 7} 120 L${x + 7} 128`, class: 'st-receptor' }, svg) }));
+    const P = []; for (let i = 0; i < 30; i++) P.push({ s: 'idle', x: 0, y: 0, o: 1, life: 0, e: el('circle', { r: 4.2, class: 'ligand', opacity: 0 }, svg) });
+    const S = {
+      P, rec, rbcs, tg, respondAt: -1, primeAt: 260,
+      status() {
+        const has = s => P.some(p => p.s === s);
+        const responding = this.respondAt >= 0 && this.t - this.respondAt < 160;
+        const out = has('up') || has('down');
+        return { release: this.t < 64, into: has('in'), flow: has('flow'), out, bind: rec.some(r => r.b) && !responding, respond: responding, conc: has('in') || out, press: has('flow') };
+      },
+      draw() {
+        P.forEach(p => { p.e.setAttribute('cx', p.x.toFixed(1)); p.e.setAttribute('cy', p.y.toFixed(1)); p.e.setAttribute('opacity', p.s === 'idle' ? 0 : p.o.toFixed(2)); });
+        rbcs.forEach(r => { r.e.setAttribute('cx', r.x.toFixed(1)); r.e.setAttribute('cy', r.y); });
+        rec.forEach(r => r.e.classList.toggle('bound', !!r.b));
+        tg.classList.toggle('responding', this.respondAt >= 0 && this.t - this.respondAt < 160);
+      }
+    };
+    return S;
+  }
+  function stepEndo(S) {
+    const t = S.t;
+    S.rbcs.forEach(r => { r.x += 2.4; if (r.x > 660) r.x -= 680; });
+    if (t < 60 && t % 2 === 0) { const p = S.P[t / 2]; p.s = 'in'; p.x = 50 + Math.random() * 120; p.y = 124; p.o = 1; p.life = 0; }
+    S.P.forEach(p => {
+      if (p.s === 'in') {
+        p.x += rnd() * 2.6; p.y += rnd() * 2.6 + 0.42;
+        p.x = Math.max(28, Math.min(230, p.x)); if (p.y < 124) p.y = 124;
+        if (p.y >= 162) { p.s = 'flow'; p.y = 166 + Math.random() * 38; }
+      } else if (p.s === 'flow') {
+        p.x += 2.4 + rnd() * 0.6; p.y = Math.max(166, Math.min(204, p.y + rnd() * 1.6));
+        if (p.x > 470 && p.x < 610 && Math.random() < 0.035) {
+          if (Math.random() < 0.62) { p.s = 'up'; p.y = 157; } else { p.s = 'down'; p.y = 213; }
+        }
+        if (p.x > 648) p.s = 'idle';
+      } else if (p.s === 'up') {
+        p.x += rnd() * 2.6; p.y += rnd() * 2.6 - 0.42;
+        p.x = Math.max(462, Math.min(618, p.x)); if (p.y > 157) p.y = 157;
+        if (p.y <= 130) {
+          const r = S.rec.find(r => !r.b && Math.abs(r.x - p.x) < 10);
+          if (r && S.respondAt < 0) { r.b = p; p.s = 'bound'; p.x = r.x; p.y = 126; } else p.y = 131;
+        }
+      } else if (p.s === 'down') {
+        p.life++;
+        p.x += rnd() * 2.6; p.y += rnd() * 2.6 + 0.42;
+        p.x = Math.max(462, Math.min(618, p.x)); if (p.y < 213) p.y = 213; if (p.y > 245) p.y = 244;
+        if (p.life > 240) p.s = 'fade';
+      } else if (p.s === 'fade') { p.o -= 0.02; if (p.o <= 0) p.s = 'idle'; }
+    });
+    if (S.respondAt < 0 && S.rec.filter(r => r.b).length >= 3) S.respondAt = t;
+    if (S.respondAt >= 0 && t - S.respondAt === 160) { S.P.forEach(p => { if (p.s !== 'idle') p.s = 'fade'; }); S.rec.forEach(r => r.b = null); }
+    if ((S.respondAt >= 0 && t - S.respondAt > 240) || t > 1600) { S.t = -1; S.respondAt = -1; S.P.forEach(p => { p.s = 'idle'; }); }
+  }
+  makeStage(document.getElementById('endo'), buildEndo, stepEndo);
+})();
+</script>
+
+</body>
+</html>
